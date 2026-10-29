@@ -1,0 +1,14 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!*.tfvars.example
+*.auto.tfvars.json
+*.pem
+*.key
+*.crt
+kubeconfig*
+.env
+.DS_Store
+__pycache__/

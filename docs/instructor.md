@@ -1,0 +1,33 @@
+# Instructor preparation and safety
+
+## Environment and inputs
+
+Provision a separate Linux workstation with Bash, Git, SSH, curl, jq, Terraform >= 1.6, Helm 3, kubectl (within Kubernetes version skew), openssl, a browser and Python 3. Commands are Linux/Bash, not PowerShell. It needs internet and network access to the Proxmox API and all three VMs. It must remain available between lessons. Prepare a public Git repository writable by the participant and readable by the cluster; a private repository requires separately configuring Argo CD credentials. Do not put lab credentials in Git.
+
+Provide a Proxmox VE 9 lab node, an isolated bridge/VLAN with internet egress, storage for three VM disks, unique free VM IDs and three reserved static IPv4 addresses with gateway and DNS. Start with **4 vCPU, 8 GiB RAM and 40 GiB disk per VM** (12 vCPU, 24 GiB and 120 GiB total), plus host/workstation overhead; Rancher and the monitoring stack may require more. SSD storage is recommended for etcd. No VM template is required: Terraform downloads a pinned official Ubuntu 24.04 amd64 cloud image to Proxmox, checks its SHA-256 digest and imports it into a new disk per VM. Cloud-init configures networking and the `ubuntu` user's SSH key. Verify the digest against Ubuntu's signed published checksums before use, and regularly review/update the pinned image and digest together.
+
+The Proxmox host, not just the workstation or VMs, must resolve and reach `cloud-images.ubuntu.com` over HTTPS. Configure a **file-based** image datastore (often `local`) with `Import` content enabled at Datacenter > Storage; VM disks and cloud-init can use a separate datastore such as `local-lvm`. Proxmox configuration, network, storage and ACLs remain prerequisites even on a clean installation. The image is a Terraform-managed resource and is deleted during an authorized destroy; do not point it at a shared file. No existing unmanaged file with the same lab-specific filename will be overwritten.
+
+Give the participant an API token with tested privileges to create, start, read, modify and delete the three lab VMs, use the VM storage and bridge, and download the image. The provider documents `Datastore.AllocateTemplate`, `Sys.Audit` and `Sys.Modify` for the download API; node-level `Sys.Modify` is broader than VM-only privileges. Assess the risk and grant these only on the dedicated lab host/storage, or have an administrator perform the download separately and adapt Terraform ownership. Proxmox ACLs and token privilege separation both apply. Verify access before the course; do not solve permission issues by granting unrestricted production access. TLS verification is on by default; install the Proxmox CA in the workstation trust store. The example allows an explicit lab-only insecure override.
+
+Prepare an environment sheet with: Proxmox URL, node, VM datastore, image datastore, bridge, VM IDs, server/worker addresses and prefix, gateway, DNS server, SSH public key path, Git HTTPS clone/push URLs, and Rancher/app FQDNs. DNS for both names should resolve to a reachable ingress endpoint. Use a private lab zone and restrict access; alternatively configure workstation hosts entries. Do not use real domains or expose management services to the public internet.
+
+## Versions and network
+
+Before delivery, choose and record exact, mutually compatible RKE2, Rancher and Kubernetes versions using the current Rancher support matrix. Export `RKE2_VERSION` on each node for installation. Choose an ingress controller supported by that Rancher release, install it, set a default IngressClass, and make its HTTP/HTTPS listeners reachable from the workstation. RKE2 ingress defaults differ by release; ingress-nginx is end-of-life. The labs do **not** assume a particular default controller. Verify Rancher TLS and ingress before teaching.
+
+Choose and record exact compatible versions for Rancher Helm chart, cert-manager if needed, kube-prometheus-stack, local-path-provisioner and Argo CD. Example released versions for Argo CD and local-path-provisioner appear in lessons; instructor must verify compatibility and update as a coordinated set. Terraform provider versions are declared in code. Pin container images/chart versions and review supply-chain security before delivery. The network must allow DNS, package/image/chart downloads and Git. Allow node-to-node traffic required by the chosen CNI and RKE2; see the RKE2 requirements. In particular 6443/TCP is the API and 9345/TCP is RKE2 registration. Never expose overlay ports publicly.
+
+For Lesson 6 provide a certificate and private key for the Rancher FQDN, plus the signing CA certificate, and install the CA on the browser workstation. The key must remain outside the repository. Rancher will use `ingress.tls.source=secret`; no cert-manager is needed for this path. Verify whether `privateCA=true` is required for the chosen certificate chain and chart version.
+
+## Rehearsal and setup
+
+1. Copy the repository into a writable Git remote, confirm no secrets, and clone it on the workstation. Configure the image storage, addresses, credentials and DNS described above.
+2. Fill in `terraform/proxmox/terraform.tfvars` from the example. Place token only in `PROXMOX_VE_API_TOKEN` environment variable. Verify all IDs are free and addresses do not overlap host, pod or service networks.
+3. Execute Lessons 1–10 sequentially on disposable infrastructure. Record actual versions, permissions, time and resource consumption. Verify a fresh clone can fetch the GitOps branch and that `app.lab.example` resolves to the ingress.
+4. Confirm the selected StorageClass works. Lesson 4 offers pinned local-path-provisioner as an isolated-lab fallback. It stores data on one node and cannot survive that node's loss; delete policy may erase data. Never use as a production resilience demonstration.
+5. Seed the participant's Git repository with the course kit. Ensure the tracked branch used by Argo CD is writable by the participant and can be fetched by Argo CD. Confirm the fault exercise and alert transitions. Prepare a disposable separate environment for optional restore practice.
+
+## Cleanup
+
+Lessons 1–9 retain state for subsequent exercises. Lesson 10 includes scoped cleanup. Before any destructive command verify the Kubernetes context, namespace, Terraform workspace, resource IDs, and review `terraform plan -destroy`. Save any required evidence/backups first. Deleting a PVC may delete its backing data. Remove secrets and lab CA keys securely and revoke API tokens after the course. Never run cleanup on shared/production resources.
