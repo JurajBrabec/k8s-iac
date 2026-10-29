@@ -2,7 +2,7 @@
 
 An English-language, five-day practical course for one experienced engineer. The participant provisions a Proxmox-based RKE2 cluster, deploys and manages an application, then applies GitOps, observability and troubleshooting practices. Azure AKS and Amazon EKS are covered without deploying cloud resources.
 
-**Start here:** [Instructor setup and safety](docs/instructor.md), then [Lesson 1](lessons/01-foundations.md). All shell commands assume Bash on the Linux workstation, from the repository root unless a lesson says otherwise. The workstation is separate from the three VMs. Replace every `<PLACEHOLDER>` with the assigned value before running a command; angle brackets are not literal shell syntax. Shell variables such as `KUBECONFIG` need to be set in each new terminal.
+**Start here:** [Instructor setup and safety](docs/instructor.md), then [Lesson 1](lessons/01-foundations.md). All shell commands assume Bash on the Linux workstation, from the repository root unless a lesson says otherwise. The workstation is separate from the lab VMs. Replace every `<PLACEHOLDER>` with the assigned value before running a command; angle brackets are not literal shell syntax. Shell variables such as `KUBECONFIG` need to be set in each new terminal.
 
 | Day | Lesson | Approx. lab time |
 |---|---|---:|
@@ -21,7 +21,7 @@ Each lesson includes objectives, steps, measurable acceptance criteria and hints
 
 ## Lab boundaries
 
-The design uses one server, two workers, node-local storage and a single Rancher instance. These choices reduce cost and complexity but are **not production HA**, security or disaster-recovery recommendations. Never point the exercises at an existing production cluster, Proxmox pool, Git repository, DNS zone or cloud account. The instructor must establish a tested, compatible version matrix and perform a rehearsal; this repository cannot guarantee compatibility with an arbitrary infrastructure.
+The default design uses one server, two workers, node-local storage and a single Rancher instance. The Terraform lab can select one to three workers and adjust per-VM CPU, memory and boot-disk size within documented bounds. These choices reduce cost and complexity but are **not production HA**, security or disaster-recovery recommendations. Never point the exercises at an existing production cluster, Proxmox pool, Git repository, DNS zone or cloud account. The instructor must establish a tested, compatible version matrix and perform a rehearsal; this repository cannot guarantee compatibility with an arbitrary infrastructure.
 
 Local validation and Helm rendering do not prove that the real Proxmox cluster or Kubernetes workloads work. No cloud account is used; cloud `validate` is not a cloud deployment or authenticated plan.
 

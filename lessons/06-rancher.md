@@ -28,7 +28,7 @@ Install and use Rancher Manager to inspect the local RKE2 cluster. Compare manag
    ```bash
    kubectl -n cattle-system get secret bootstrap-secret -o go-template='{{ .data.bootstrapPassword | base64decode }}{{ "\n" }}'
    ```
-4. In Rancher inspect the local cluster, three nodes, `lab` namespace and workload. Create a project and a separate namespace for the permissions exercise. Create a local restricted user, grant only the needed project membership, log in in a separate browser session and verify an allowed read and a denied administrative action. Restore the administrator session.
+4. In Rancher inspect the local cluster, all configured nodes, `lab` namespace and workload. Create a project and a separate namespace for the permissions exercise. Create a local restricted user, grant only the needed project membership, log in in a separate browser session and verify an allowed read and a denied administrative action. Restore the administrator session.
 5. Explain how a separate HA Rancher management cluster, downstream clusters, real identity provider, backup and trusted TLS would improve on the lab topology.
 
 ## Acceptance

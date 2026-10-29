@@ -14,6 +14,18 @@ provider "proxmox" {
   # Authenticate through PROXMOX_VE_API_TOKEN, not a file in Git.
 }
 
+locals {
+  worker_names = sort([
+    for name in keys(var.nodes) : name
+    if name != "lab-server"
+  ])
+
+  active_nodes = {
+    for name, node in var.nodes : name => node
+    if name == "lab-server" ? true : index(local.worker_names, name) < var.worker_count
+  }
+}
+
 resource "proxmox_download_file" "ubuntu" {
   content_type       = "import"
   datastore_id       = var.image_datastore
@@ -26,7 +38,7 @@ resource "proxmox_download_file" "ubuntu" {
 }
 
 resource "proxmox_virtual_environment_vm" "node" {
-  for_each    = var.nodes
+  for_each    = local.active_nodes
   name        = each.key
   node_name   = var.proxmox_node
   vm_id       = each.value.id
@@ -39,19 +51,19 @@ resource "proxmox_virtual_environment_vm" "node" {
   }
 
   cpu {
-    cores = 4
-    type  = "x86-64-v2-AES"
+    cores = var.cpu_cores
+    type  = var.cpu_type
   }
 
   memory {
-    dedicated = 8192
+    dedicated = var.memory_gib * 1024
   }
 
   disk {
     datastore_id = var.datastore
     import_from  = proxmox_download_file.ubuntu.id
     interface    = "scsi0"
-    size         = 40
+    size         = var.disk_gb
   }
 
   operating_system {
@@ -78,9 +90,16 @@ resource "proxmox_virtual_environment_vm" "node" {
       keys     = [trimspace(file(pathexpand(var.ssh_public_key_path)))]
     }
   }
+
+  lifecycle {
+    precondition {
+      condition     = var.worker_count <= length(local.worker_names)
+      error_message = "worker_count exceeds the number of worker VM definitions in var.nodes. Add an ID and address for each requested worker."
+    }
+  }
 }
 
 output "node_addresses" {
   description = "Configured static CIDR addresses; reachability is checked separately."
-  value       = { for name, node in var.nodes : name => node.address }
+  value       = { for name, node in local.active_nodes : name => node.address }
 }

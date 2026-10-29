@@ -3,6 +3,11 @@ insecure            = false
 proxmox_node        = "pve"
 datastore           = "local-lvm"
 image_datastore     = "local"
+cpu_type            = "qemu64"
+cpu_cores           = 4
+memory_gib          = 8
+disk_gb             = 40
+worker_count        = 2
 bridge              = "vmbr0"
 gateway             = "192.168.50.1"
 dns_server          = "192.168.50.1"
@@ -11,4 +16,5 @@ nodes = {
   lab-server  = { id = 301, address = "192.168.50.101/24" }
   lab-worker1 = { id = 302, address = "192.168.50.102/24" }
   lab-worker2 = { id = 303, address = "192.168.50.103/24" }
+  lab-worker3 = { id = 304, address = "192.168.50.104/24" }
 }

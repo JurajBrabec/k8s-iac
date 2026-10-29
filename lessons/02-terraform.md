@@ -4,12 +4,13 @@
 
 ## Objectives and concepts
 
-Use a provider, variables, resources, state, plan and outputs to create three VMs. A saved plan is a reviewable execution decision, not a substitute for checking ownership. Local state is acceptable only for this single-user, disposable lab; production teams need a secured remote backend with locking, access control and backup.
+Use a provider, variables, resources, state, plan and outputs to create one server VM plus one to three worker VMs. Tune CPU cores, memory and boot-disk size within the supported ranges. A saved plan is a reviewable execution decision, not a substitute for checking ownership. Local state is acceptable only for this single-user, disposable lab; production teams need a secured remote backend with locking, access control and backup.
 
 ## Exercise
 
 1. Inspect `terraform/proxmox/main.tf`, `variables.tf` and the example values. The VM map is the desired configuration. Terraform downloads one pinned Ubuntu cloud image to the import-enabled file datastore, checks its checksum and imports it as the boot disk of each new VM; cloud-init configures SSH and networking. Confirm the [instructor prerequisites](../docs/instructor.md), image digest and unused VM IDs.
-2. Copy the example and edit all environment-specific values; `.tfvars` is ignored by Git. Set `ssh_public_key_path` to an existing public key on the machine running Terraform; `~/.ssh/id_ed25519.pub` and absolute paths are supported. Verify the file with `test -f ~/.ssh/id_ed25519.pub` or substitute your own path. If you have no key pair, run `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519` and choose a passphrase; do not overwrite an existing key. Use only the `.pub` file here, and keep the private key secure. Authenticate using the instructor-issued token without putting it into shell history:
+   The example defaults to the portable `qemu64` CPU model. On a modern host you may set `cpu_type` to a more capable model (such as `x86-64-v2-AES`) only after verifying the host exposes all required features.
+2. Copy the example and edit all environment-specific values; `.tfvars` is ignored by Git. Set `cpu_cores` to an integer from 1–4, `memory_gib` to 4–8, `disk_gb` to 20–40 and `worker_count` to 1–3. Supply a `nodes` entry with unique VM ID and address for `lab-server` and every worker you want Terraform to be able to create. `worker_count` selects the lexicographically first worker names in the map; define up to three entries. Lowering the worker count destroys the no-longer-selected VMs; review the plan carefully. Increasing a VM disk is generally supported; shrinking an existing disk is not, and may require VM replacement and data loss. Changing CPU/memory may require a VM restart. Set `ssh_public_key_path` to an existing public key on the machine running Terraform; `~/.ssh/id_ed25519.pub` and absolute paths are supported. Verify the file with `test -f ~/.ssh/id_ed25519.pub` or substitute your own path. If you have no key pair, run `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519` and choose a passphrase; do not overwrite an existing key. Use only the `.pub` file here, and keep the private key secure. Authenticate using the instructor-issued token without putting it into shell history:
    ```bash
    cd terraform/proxmox
    cp terraform.tfvars.example terraform.tfvars
@@ -22,7 +23,7 @@ Use a provider, variables, resources, state, plan and outputs to create three VM
    terraform plan -out=lab.tfplan
    ```
    The token format is `user@realm!tokenid=secret`. Use a trusted CA; set `insecure=true` only when explicitly authorized in an isolated lab.
-3. Review the saved plan: it should create exactly three assigned VMs and one lab-owned image download, without affecting anything outside the lab. If not, stop. Apply the reviewed plan:
+3. Review the saved plan: it should create one server, the configured number of workers, and one lab-owned image download, without affecting anything outside the lab. If not, stop. Apply the reviewed plan:
    ```bash
    terraform apply lab.tfplan
    terraform output node_addresses
@@ -33,7 +34,7 @@ Use a provider, variables, resources, state, plan and outputs to create three VM
 
 ## Acceptance
 
-- Exactly three assigned VMs exist, boot and accept SSH; configured addresses and unique hostnames match.
+- One server and the configured number of worker VMs exist, boot and accept SSH; configured addresses and unique hostnames match.
 - A subsequent plan reports no changes, and a reviewed, non-destructive change was applied.
 - Explain why state and plan files require protection even if outputs are marked sensitive.
 
