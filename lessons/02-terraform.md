@@ -9,7 +9,7 @@ Use a provider, variables, resources, state, plan and outputs to create three VM
 ## Exercise
 
 1. Inspect `terraform/proxmox/main.tf`, `variables.tf` and the example values. The VM map is the desired configuration. Terraform downloads one pinned Ubuntu cloud image to the import-enabled file datastore, checks its checksum and imports it as the boot disk of each new VM; cloud-init configures SSH and networking. Confirm the [instructor prerequisites](../docs/instructor.md), image digest and unused VM IDs.
-2. Copy the example and edit all environment-specific values; `.tfvars` is ignored by Git. Set `ssh_public_key_path` to an absolute path, and use only the public key. Authenticate using the instructor-issued token without putting it into shell history:
+2. Copy the example and edit all environment-specific values; `.tfvars` is ignored by Git. Set `ssh_public_key_path` to an existing public key on the machine running Terraform; `~/.ssh/id_ed25519.pub` and absolute paths are supported. Verify the file with `test -f ~/.ssh/id_ed25519.pub` or substitute your own path. If you have no key pair, run `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519` and choose a passphrase; do not overwrite an existing key. Use only the `.pub` file here, and keep the private key secure. Authenticate using the instructor-issued token without putting it into shell history:
    ```bash
    cd terraform/proxmox
    cp terraform.tfvars.example terraform.tfvars
@@ -37,4 +37,4 @@ Use a provider, variables, resources, state, plan and outputs to create three VM
 - A subsequent plan reports no changes, and a reviewed, non-destructive change was applied.
 - Explain why state and plan files require protection even if outputs are marked sensitive.
 
-**Hints:** A 403 usually means missing user *or token* ACLs; an image download error can mean missing node-level privileges, no Proxmox host internet access, or Import content not enabled on the image datastore. Verify the downloaded image's checksum and guest cloud-init logs. VM disk growth requires the guest/cloud-init to resize its filesystem. Do not destroy resources until Lesson 10.
+**Hints:** A missing public key must be fixed on the machine running Terraform, not inside a VM. A 403 usually means missing user *or token* ACLs; an image download error can mean missing node-level privileges, no Proxmox host internet access, or Import content not enabled on the image datastore. Verify the downloaded image's checksum and guest cloud-init logs. VM disk growth requires the guest/cloud-init to resize its filesystem. Do not destroy resources until Lesson 10.

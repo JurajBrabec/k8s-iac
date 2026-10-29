@@ -75,7 +75,7 @@ resource "proxmox_virtual_environment_vm" "node" {
     }
     user_account {
       username = "ubuntu"
-      keys     = [trimspace(file(var.ssh_public_key_path))]
+      keys     = [trimspace(file(pathexpand(var.ssh_public_key_path)))]
     }
   }
 }
