@@ -25,6 +25,8 @@ Verify the environment, use Git for controlled changes, and distinguish imperati
    terraform version
    helm version
    kubectl version --client
+   ansible --version
+   jq --version
    ssh -V
    ```
    Check the assigned Proxmox endpoint with a browser or `curl` using the trusted lab CA. Do not send API tokens to untrusted endpoints.

@@ -8,7 +8,7 @@ An English-language, five-day practical course for one experienced engineer. The
 |---|---|---:|
 | 1 | [1. Linux, Git and DevOps](lessons/01-foundations.md) | 3 h |
 | 1 | [2. Terraform and Proxmox](lessons/02-terraform.md) | 3 h |
-| 2 | [3. RKE2](lessons/03-rke2.md) | 3 h |
+| 2 | [3. Bootstrap RKE2 with Ansible](lessons/03-rke2.md) | 3 h |
 | 2 | [4. Kubernetes workloads](lessons/04-kubernetes.md) | 3 h |
 | 3 | [5. Helm](lessons/05-helm.md) | 3 h |
 | 3 | [6. Rancher Manager](lessons/06-rancher.md) | 3 h |
@@ -18,6 +18,8 @@ An English-language, five-day practical course for one experienced engineer. The
 | 5 | [10. Troubleshooting and recovery](lessons/10-troubleshooting.md) | 3 h |
 
 Each lesson includes objectives, steps, measurable acceptance criteria and hints. Allow additional time for instruction, breaks, downloads and provisioning. [Assessment and answer guide](docs/assessment.md) provides the instructor rubric. [References](docs/references.md) links to upstream documentation.
+
+The infrastructure workflow deliberately separates tools: **Terraform** provisions Proxmox VMs, **Ansible** installs and configures RKE2 over SSH, and **Argo CD** later reconciles Kubernetes application manifests from Git. SSH is Ansible's transport, not a requirement to manually administer each node.
 
 ## Lab boundaries
 

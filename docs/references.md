@@ -2,6 +2,7 @@
 
 - [Kubernetes concepts](https://kubernetes.io/docs/concepts/), [workloads](https://kubernetes.io/docs/concepts/workloads/), [debugging](https://kubernetes.io/docs/tasks/debug/)
 - [Terraform documentation](https://developer.hashicorp.com/terraform/docs) and [bpg Proxmox provider](https://registry.terraform.io/providers/bpg/proxmox/latest/docs)
+- [Ansible playbooks](https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_intro.html) and [inventory](https://docs.ansible.com/projects/ansible/latest/inventory_guide/intro_inventory.html)
 - [Proxmox administration](https://pve.proxmox.com/pve-docs/)
 - [RKE2 quick start](https://docs.rke2.io/install/quickstart), [requirements](https://docs.rke2.io/install/requirements), [backup/restore](https://docs.rke2.io/datastore/backup_restore)
 - [Rancher installation](https://ranchermanager.docs.rancher.com/getting-started/installation-and-upgrade/install-upgrade-on-a-kubernetes-cluster) and [support matrix](https://www.suse.com/suse-rancher/support-matrix/)

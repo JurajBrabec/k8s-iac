@@ -1,0 +1,216 @@
+---
+- name: Prepare nodes and install the pinned RKE2 release
+  hosts: rke2_servers:rke2_workers
+  become: true
+  gather_facts: true
+  vars:
+    rke2_version: "{{ lookup('env', 'RKE2_VERSION') }}"
+    rke2_installer: /var/tmp/rke2-install.sh
+  pre_tasks:
+    - name: Validate the requested RKE2 version and inventory
+      ansible.builtin.assert:
+        that:
+          - rke2_version | length > 0
+          - groups['rke2_servers'] | length == 1
+          - groups['rke2_workers'] | length >= 1
+          - groups['rke2_workers'] | length <= 3
+        fail_msg: >-
+          Set RKE2_VERSION to the instructor-approved release and provide one
+          server plus one to three workers in the generated inventory.
+      run_once: true
+
+  tasks:
+    - name: Install RKE2 host prerequisites
+      ansible.builtin.apt:
+        name:
+          - apparmor
+          - apparmor-utils
+          - ca-certificates
+          - curl
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Download the official RKE2 installer
+      ansible.builtin.get_url:
+        url: https://get.rke2.io
+        dest: "{{ rke2_installer }}"
+        mode: "0755"
+        force: false
+
+    - name: Check whether RKE2 is already installed
+      ansible.builtin.stat:
+        path: /usr/local/bin/rke2
+      register: rke2_binary
+
+    - name: Install the pinned RKE2 server or agent binary and systemd unit
+      ansible.builtin.command: /bin/sh {{ rke2_installer }}
+      args:
+        creates: /usr/local/bin/rke2
+      environment:
+        INSTALL_RKE2_VERSION: "{{ rke2_version }}"
+        INSTALL_RKE2_TYPE: "{{ 'server' if 'rke2_servers' in group_names else 'agent' }}"
+      when: not rke2_binary.stat.exists
+
+    - name: Read the installed RKE2 version
+      ansible.builtin.command: /usr/local/bin/rke2 --version
+      register: installed_rke2_version
+      changed_when: false
+
+    - name: Fail rather than silently run a different RKE2 version
+      ansible.builtin.assert:
+        that:
+          - rke2_version in installed_rke2_version.stdout
+        fail_msg: >-
+          Installed RKE2 version does not match RKE2_VERSION. Upgrades are
+          intentionally separate from this bootstrap playbook.
+
+- name: Configure and start the RKE2 server
+  hosts: rke2_servers
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Ensure the RKE2 configuration directory exists
+      ansible.builtin.file:
+        path: /etc/rancher/rke2
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Write RKE2 server configuration
+      ansible.builtin.template:
+        src: templates/server-config.yaml.j2
+        dest: /etc/rancher/rke2/config.yaml
+        owner: root
+        group: root
+        mode: "0600"
+      notify: Restart RKE2 server
+
+    - name: Enable and start the RKE2 server
+      ansible.builtin.systemd_service:
+        name: rke2-server
+        enabled: true
+        state: started
+
+    - name: Wait for the RKE2 registration endpoint
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: 9345
+        state: started
+        timeout: 900
+      delegate_to: localhost
+      become: false
+
+    - name: Wait for the RKE2 server token file
+      ansible.builtin.wait_for:
+        path: /var/lib/rancher/rke2/server/node-token
+        state: present
+        timeout: 300
+
+    - name: Read the worker registration token without logging it
+      ansible.builtin.slurp:
+        src: /var/lib/rancher/rke2/server/node-token
+      register: rke2_node_token
+      no_log: true
+
+  handlers:
+    - name: Restart RKE2 server
+      ansible.builtin.systemd_service:
+        name: rke2-server
+        state: restarted
+
+- name: Configure and start RKE2 workers
+  hosts: rke2_workers
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Ensure the RKE2 configuration directory exists
+      ansible.builtin.file:
+        path: /etc/rancher/rke2
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Write worker configuration with restricted permissions
+      ansible.builtin.template:
+        src: templates/agent-config.yaml.j2
+        dest: /etc/rancher/rke2/config.yaml
+        owner: root
+        group: root
+        mode: "0600"
+      no_log: true
+      notify: Restart RKE2 agent
+
+    - name: Enable and start the RKE2 agent
+      ansible.builtin.systemd_service:
+        name: rke2-agent
+        enabled: true
+        state: started
+
+  handlers:
+    - name: Restart RKE2 agent
+      ansible.builtin.systemd_service:
+        name: rke2-agent
+        state: restarted
+
+- name: Retrieve kubeconfig and verify cluster readiness
+  hosts: rke2_servers
+  become: true
+  gather_facts: false
+  vars:
+    kubeconfig_path: "{{ playbook_dir }}/../artifacts/kubeconfig-lab"
+    expected_nodes: "{{ (groups['rke2_servers'] | length) + (groups['rke2_workers'] | length) }}"
+  tasks:
+    - name: Create a private local artifacts directory
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../artifacts"
+        state: directory
+        mode: "0700"
+      delegate_to: localhost
+      become: false
+
+    - name: Read the RKE2 kubeconfig without logging credentials
+      ansible.builtin.slurp:
+        src: /etc/rancher/rke2/rke2.yaml
+      register: rke2_kubeconfig
+      no_log: true
+
+    - name: Write a private kubeconfig with the reachable server address
+      ansible.builtin.copy:
+        content: "{{ rke2_kubeconfig.content | b64decode | replace('https://127.0.0.1:6443', 'https://' ~ ansible_host ~ ':6443') }}"
+        dest: "{{ kubeconfig_path }}"
+        mode: "0600"
+      delegate_to: localhost
+      become: false
+      no_log: true
+
+    - name: Wait for all cluster nodes to become Ready
+      ansible.builtin.command: kubectl wait --for=condition=Ready node --all --timeout=600s
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+      delegate_to: localhost
+      become: false
+      changed_when: false
+
+    - name: Get registered Kubernetes nodes
+      ansible.builtin.command: kubectl get nodes --no-headers -o name
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+      delegate_to: localhost
+      become: false
+      register: registered_nodes
+      changed_when: false
+
+    - name: Verify the expected number of nodes registered
+      ansible.builtin.assert:
+        that:
+          - registered_nodes.stdout_lines | length == (expected_nodes | int)
+        fail_msg: >-
+          Expected {{ expected_nodes }} Kubernetes nodes, found
+          {{ registered_nodes.stdout_lines | length }}.
+
+    - name: Show registered nodes
+      ansible.builtin.debug:
+        var: registered_nodes.stdout_lines
