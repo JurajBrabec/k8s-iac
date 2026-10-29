@@ -15,8 +15,8 @@ variable "datastore" {
 }
 variable "cpu_type" {
   type        = string
-  description = "QEMU CPU model exposed to the guest. qemu64 is a compatibility baseline; use a newer model only if the Proxmox host supports its features."
-  default     = "qemu64"
+  description = "QEMU CPU model exposed to the guest. Ubuntu 24.04 needs x86-64-v2 features; use x86-64-v2-AES or a compatible host CPU model."
+  default     = "x86-64-v2-AES"
 }
 variable "cpu_cores" {
   type        = number
