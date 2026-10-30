@@ -1,6 +1,6 @@
-replicaCount: 2
+replicaCount: 3
 image: python:3.13-alpine
-message: "Hello from Kubernetes IaC lab"
+message: 'Hello from Kubernetes IaC lab'
 serviceSelector: lab-app
 ingress:
   enabled: true
