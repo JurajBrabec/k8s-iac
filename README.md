@@ -11,7 +11,7 @@ An English-language, five-day practical course for one experienced engineer. The
 | 2 | [3. Bootstrap RKE2 with Ansible](lessons/03-rke2.md) | 3 h |
 | 2 | [4. Kubernetes workloads](lessons/04-kubernetes.md) | 3 h |
 | 3 | [5. Helm](lessons/05-helm.md) | 3 h |
-| 3 | [6. Rancher Manager](lessons/06-rancher.md) | 3 h |
+| 3 | [6. Rancher Manager](lessons/06-rancher.md) ([custom TLS variant](lessons/06-rancher-tls.md)) | 3 h |
 | 4 | [7. GitOps and Argo CD](lessons/07-gitops.md) | 3 h |
 | 4 | [8. Prometheus and Grafana](lessons/08-observability.md) | 3 h |
 | 5 | [9. AKS and EKS](lessons/09-cloud.md) | 3 h |

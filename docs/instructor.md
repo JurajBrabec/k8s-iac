@@ -18,7 +18,45 @@ Before delivery, choose and record exact, mutually compatible RKE2, Rancher and 
 
 Choose and record exact compatible versions for Rancher Helm chart, cert-manager if needed, kube-prometheus-stack, local-path-provisioner and Argo CD. Example released versions for Argo CD and local-path-provisioner appear in lessons; instructor must verify compatibility and update as a coordinated set. Terraform provider versions are declared in code. Pin container images/chart versions and review supply-chain security before delivery. The network must allow DNS, package/image/chart downloads and Git. Allow node-to-node traffic required by the chosen CNI and RKE2; see the RKE2 requirements. In particular 6443/TCP is the API and 9345/TCP is RKE2 registration. Never expose overlay ports publicly.
 
-For Lesson 6 provide a certificate and private key for the Rancher FQDN, plus the signing CA certificate, and install the CA on the browser workstation. The key must remain outside the repository. Rancher will use `ingress.tls.source=secret`; no cert-manager is needed for this path. Verify whether `privateCA=true` is required for the chosen certificate chain and chart version.
+For the default Lesson 6 (`lessons/06-rancher.md`), select and rehearse a cert-manager chart version compatible with the chosen Rancher release. This lesson uses Rancher-generated self-signed certificates (`ingress.tls.source=rancher`), so no externally supplied TLS certificate, private key, or CA bundle is needed. Warn participants that their browser may report the generated CA as untrusted; explain how to trust the CA in a controlled lab and never to bypass validation in production. The custom-secret variant (`lessons/06-rancher-tls.md`) does not require cert-manager.
+
+For the custom TLS variant, generate a certificate and private key for the Rancher FQDN, plus the signing CA certificate, and install the CA certificate on the browser workstation. Run these commands in Bash; they store all files under `$HOME/certs`, outside the repository. The CA private key must remain protected and must never be committed. The server certificate must include a DNS SAN matching the Rancher FQDN. The lesson uses `ingress.tls.source=secret`; no cert-manager is needed for this path.
+
+```sh
+umask 077
+mkdir -p "$HOME/certs"
+chmod 700 "$HOME/certs"
+export RANCHER_FQDN='rancher.lab.example'
+
+# Create a local CA
+openssl genrsa -out "$HOME/certs/ca.key" 3072
+openssl req -x509 -new -key "$HOME/certs/ca.key" -sha256 -days 365 \
+  -out "$HOME/certs/ca.crt" -subj "/CN=Lab-CA" \
+  -addext 'basicConstraints=critical,CA:TRUE' \
+  -addext 'keyUsage=critical,keyCertSign,cRLSign' \
+  -addext 'subjectKeyIdentifier=hash'
+
+# Create server key and CSR
+openssl genrsa -out "$HOME/certs/tls.key" 2048
+openssl req -new -key "$HOME/certs/tls.key" \
+  -out "$HOME/certs/tls.csr" -subj "/CN=${RANCHER_FQDN}"
+
+# Add the hostname SAN and server-certificate extensions
+cat > "$HOME/certs/server.ext" <<EOF
+basicConstraints=critical,CA:FALSE
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=serverAuth
+subjectAltName=DNS:${RANCHER_FQDN}
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
+EOF
+
+# Sign the server certificate with your local CA
+openssl x509 -req -in "$HOME/certs/tls.csr" \
+  -CA "$HOME/certs/ca.crt" -CAkey "$HOME/certs/ca.key" -CAcreateserial \
+  -out "$HOME/certs/tls.crt" -days 365 -sha256 \
+  -extfile "$HOME/certs/server.ext"
+```
 
 ## Rehearsal and setup
 
