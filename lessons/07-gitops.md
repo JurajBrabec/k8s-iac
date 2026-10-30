@@ -24,6 +24,7 @@ Argo CD reads desired manifests from Git and reconciles the cluster. A `Synced` 
 3. Create an Argo CD Application with your actual HTTPS Git URL. The `training` branch is deliberate; change the revision if the instructor uses another branch. It deploys to the same cluster and `lab` namespace:
    ```bash
    export GIT_REPO_URL='https://github.com/<OWNER>/<REPOSITORY>.git'
+   export GIT_REPO_BRANCH='training'
    cat <<EOF | kubectl apply -f -
    apiVersion: argoproj.io/v1alpha1
    kind: Application
@@ -34,7 +35,7 @@ Argo CD reads desired manifests from Git and reconciles the cluster. A `Synced` 
      project: default
      source:
        repoURL: ${GIT_REPO_URL}
-       targetRevision: training
+       targetRevision: ${GIT_REPO_BRANCH}
        path: charts/lab-app
        helm:
          releaseName: lab-app
