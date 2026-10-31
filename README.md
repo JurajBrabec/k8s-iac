@@ -1,6 +1,6 @@
 # Kubernetes — Infrastructure as Code
 
-An English-language, five-day practical course for one experienced engineer. The participant provisions a Proxmox-based RKE2 cluster, deploys and manages an application, then applies GitOps, observability and troubleshooting practices. Azure AKS and Amazon EKS are covered without deploying cloud resources.
+An English-language, five-day practical core course for one experienced engineer. The participant provisions a Proxmox-based RKE2 cluster, deploys and manages an application, then applies GitOps, observability and troubleshooting practices. Azure AKS and Amazon EKS are covered without deploying cloud resources. An optional advanced track (Lessons 11–16) extends the course into CI/CD, security, operations, reliability, production IaC and platform engineering.
 
 **Start here:** [Instructor setup and safety](docs/instructor.md), then [Lesson 1](lessons/01-foundations.md). All shell commands assume Bash on the Linux workstation, from the repository root unless a lesson says otherwise. The workstation is separate from the lab VMs. Replace every `<PLACEHOLDER>` with the assigned value before running a command; angle brackets are not literal shell syntax. Shell variables such as `KUBECONFIG` need to be set in each new terminal.
 
@@ -16,6 +16,21 @@ An English-language, five-day practical course for one experienced engineer. The
 | 4 | [8. Prometheus and Grafana](lessons/08-observability.md) | 3 h |
 | 5 | [9. AKS and EKS](lessons/09-cloud.md) | 3 h |
 | 5 | [10. Troubleshooting and recovery](lessons/10-troubleshooting.md) | 3 h |
+
+### Optional advanced track
+
+These six 3-hour modules can be delivered after the core course or selected individually. They use the disposable lab and do not authorize deployment to production or real cloud accounts.
+
+| Module | Lesson | Approx. lab time |
+|---|---|---:|
+| 11 | [CI, container delivery and GitOps promotion](lessons/11-ci-delivery.md) | 3 h |
+| 12 | [Security guardrails and software supply chain](lessons/12-security-supply-chain.md) | 3 h |
+| 13 | [Kubernetes operations and lifecycle](lessons/13-cluster-operations.md) | 3 h |
+| 14 | [SRE, observability and disaster recovery](lessons/14-sre-recovery.md) | 3 h |
+| 15 | [Production IaC and cloud operating model](lessons/15-production-iac-cloud.md) | 3 h |
+| 16 | [Platform engineering and FinOps](lessons/16-platform-engineering.md) | 3 h |
+
+Each advanced lesson includes a constrained lab, evidence and production tradeoffs. Some activities require an instructor-approved CI provider, disposable container registry, security-scanning tools, or a separate disposable recovery environment; read the lesson prerequisites before scheduling.
 
 Each lesson includes objectives, steps, measurable acceptance criteria and hints. Allow additional time for instruction, breaks, downloads and provisioning. [Assessment and answer guide](docs/assessment.md) provides the instructor rubric. [References](docs/references.md) links to upstream documentation.
 

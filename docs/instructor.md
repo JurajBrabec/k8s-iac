@@ -66,6 +66,19 @@ openssl x509 -req -in "$HOME/certs/tls.csr" \
 4. Confirm the selected StorageClass works. Lesson 4 offers pinned local-path-provisioner as an isolated-lab fallback. It stores data on one node and cannot survive that node's loss; delete policy may erase data. Never use as a production resilience demonstration.
 5. Seed the participant's Git repository with the course kit. Ensure the tracked branch used by Argo CD is writable by the participant and can be fetched by Argo CD. Confirm the fault exercise and alert transitions. Prepare a disposable separate environment for optional restore practice.
 
+## Optional advanced-track preparation
+
+Lessons 11–16 are an extension and are not prerequisites for the five-day core course. Before teaching them:
+
+- Provide a disposable GitHub repository with pull-request checks and branch protection available. Review CI action pinning and permissions; do not make secrets available to untrusted pull-request code.
+- If teaching image publishing, provide a disposable registry/repository and a narrowly scoped package-publish identity. Confirm the lab cluster can pull the image. Never use a production registry or long-lived personal token.
+- Pin and rehearse the container builder, vulnerability scanner and SBOM tooling. Decide whether image signing/provenance can be demonstrated or is a design-only outcome.
+- Reserve a dedicated disposable cluster with at least two workers for the Lesson 13 drain exercise. Confirm workload placement, PDB behavior, CNI NetworkPolicy support and node-local data implications first. Do not use shared infrastructure.
+- Provide a separate version-matched recovery environment before asking participants to perform an actual restore. Otherwise mark the exercise runbook-reviewed only.
+- Do not issue Azure/AWS credentials for Lesson 15. It is a design and static-review exercise; no cloud plan or deployment is part of the track.
+
+Rehearse the extension end to end and record tool versions, runner/registry permissions, expected costs and cleanup. Delete only lesson-owned registry artifacts and namespaces, revoke temporary identities, and preserve no credentials in evidence.
+
 ## Cleanup
 
 Lessons 1–9 retain state for subsequent exercises. Lesson 10 includes scoped cleanup. Before any destructive command verify the Kubernetes context, namespace, Terraform workspace, resource IDs, and review `terraform plan -destroy`. Save any required evidence/backups first. Deleting a PVC may delete its backing data. Remove secrets and lab CA keys securely and revoke API tokens after the course. Never run cleanup on shared/production resources.

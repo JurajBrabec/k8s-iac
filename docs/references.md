@@ -9,3 +9,8 @@
 - [Helm documentation](https://helm.sh/docs/), [Argo CD getting started](https://argo-cd.readthedocs.io/en/stable/getting_started/)
 - [Prometheus](https://prometheus.io/docs/introduction/overview/) and [Grafana](https://grafana.com/docs/grafana/latest/)
 - [AKS Terraform quickstart](https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-terraform), [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html)
+- [GitHub Actions](https://docs.github.com/actions), [GitHub Actions security hardening](https://docs.github.com/actions/security-guides/security-hardening-for-github-actions), [GitHub Packages / Container registry](https://docs.github.com/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
+- [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/), [ResourceQuota](https://kubernetes.io/docs/concepts/policy/resource-quotas/), [PodDisruptionBudgets](https://kubernetes.io/docs/tasks/run-application/configure-pdb/), [NetworkPolicies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [SRE workbook](https://sre.google/workbook/), [Prometheus alerting](https://prometheus.io/docs/alerting/latest/overview/), [RKE2 upgrade](https://docs.rke2.io/upgrades/manual_upgrade)
+- [Terraform state](https://developer.hashicorp.com/terraform/language/state), [Terraform backends](https://developer.hashicorp.com/terraform/language/backend), [Terraform recommendations](https://developer.hashicorp.com/terraform/cloud-docs/recommendations)
+- [OpenSSF SLSA](https://slsa.dev/), [Sigstore Cosign](https://docs.sigstore.dev/cosign/overview/), [CycloneDX SBOM](https://cyclonedx.org/)
