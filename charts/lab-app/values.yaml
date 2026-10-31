@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 image: python:3.13-alpine
 message: 'Hello from Kubernetes IaC lab'
 serviceSelector: lab-app
