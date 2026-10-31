@@ -22,7 +22,7 @@ Prometheus collects time-series metrics; Grafana queries and visualizes them; Al
    The provided values select ServiceMonitors and rules without the release-only selector. This is permissive for a dedicated lab; scope selectors in production. Prometheus and Grafana storage is ephemeral by default and alert notifications have no external receiver.
 2. Start a Prometheus port forward on the workstation in another terminal:
    ```bash
-   kubectl -n monitoring port-forward svc/monitor-kube-prometheus-prometheus 9090:9090
+   kubectl -n monitoring port-forward svc/monitor-kube-prometheus-st-prometheus 9090:9090
    ```
    Open `http://localhost:9090/targets`. Find `lab/lab-app` targets, allow time for scraping and verify they are `UP`. If service names differ with the chosen chart version, find the actual name using `kubectl -n monitoring get svc`.
 3. Generate traffic including deliberate errors:
